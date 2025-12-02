@@ -9,6 +9,9 @@ import time
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key-change-in-production'
 
+# 网站域名配置，部署时修改为你的域名
+SITE_URL = 'https://code.mqmx.cn'
+
 DATABASE = 'pastes.db'
 
 def get_db():
@@ -122,7 +125,8 @@ def view_paste(paste_id):
                 (paste_id,)
             ).fetchall()
     
-    return render_template('view.html', paste=paste, files=files)
+    share_url = f"{SITE_URL}/p/{paste_id}"
+    return render_template('view.html', paste=paste, files=files, share_url=share_url)
 
 @app.route('/p/<paste_id>/raw')
 def raw_paste(paste_id):

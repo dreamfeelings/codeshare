@@ -159,7 +159,7 @@
                 </div>
                 <div class="share-box">
                     <div class="d-flex gap-2 align-items-center">
-                        <span class="share-url" id="shareUrl"></span>
+                        <span class="share-url" id="shareUrl">{{ share_url }}</span>
                         <button class="btn btn-primary" onclick="copyUrl()">
                             <i class="bi bi-clipboard"></i>
                         </button>
@@ -231,9 +231,6 @@
     <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/highlight.min.js') }}"></script>
     <script>
-        // 设置分享链接为当前页面URL
-        document.getElementById('shareUrl').textContent = window.location.href;
-
         // 代码高亮
         hljs.highlightAll();
 
