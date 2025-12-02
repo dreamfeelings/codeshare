@@ -207,7 +207,12 @@
                             </a>
                         </div>
                     </div>
+                    {% if file.language == 'markdown' %}
+                    <div id="markdown-{{ file.id }}" class="p-4" style="background: #fff; border-radius: 0 0 8px 8px;"></div>
+                    <div id="raw-{{ file.id }}" style="display:none;">{{ file.content }}</div>
+                    {% else %}
                     <pre><code id="code-{{ file.id }}" class="language-{{ file.language }}">{{ file.content }}</code></pre>
+                    {% endif %}
                 </div>
                 {% endfor %}
             </div>
@@ -230,7 +235,12 @@
                     </a>
                 </div>
             </div>
+            {% if paste.language == 'markdown' %}
+            <div id="markdown-main" class="p-4" style="background: #fff; border-radius: 0 0 8px 8px;"></div>
+            <div id="raw-main" style="display:none;">{{ paste.content }}</div>
+            {% else %}
             <pre><code id="code-main" class="language-{{ paste.language }}">{{ paste.content }}</code></pre>
+            {% endif %}
         </div>
         {% endif %}
     </div>
@@ -250,9 +260,19 @@
 
     <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/highlight.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/marked.min.js') }}"></script>
     <script>
         // 代码高亮
         hljs.highlightAll();
+
+        // Markdown渲染
+        document.querySelectorAll('[id^="markdown-"]').forEach(el => {
+            const rawId = el.id.replace('markdown-', 'raw-');
+            const rawEl = document.getElementById(rawId);
+            if (rawEl) {
+                el.innerHTML = marked.parse(rawEl.textContent);
+            }
+        });
 
         function showToast(msg) {
             document.getElementById('toastMsg').textContent = msg;
