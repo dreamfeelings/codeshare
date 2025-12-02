@@ -228,21 +228,40 @@
         {% endif %}
     </div>
 
+    <!-- Toast 提示 -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div id="toast" class="toast align-items-center border-0" role="alert">
+            <div class="d-flex">
+                <div class="toast-body d-flex align-items-center gap-2">
+                    <i class="bi bi-check-circle-fill text-success"></i>
+                    <span id="toastMsg"></span>
+                </div>
+                <button type="button" class="btn-close btn-close-dark me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    </div>
+
     <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/highlight.min.js') }}"></script>
     <script>
         // 代码高亮
         hljs.highlightAll();
 
+        function showToast(msg) {
+            document.getElementById('toastMsg').textContent = msg;
+            const toast = new bootstrap.Toast(document.getElementById('toast'), { delay: 2000 });
+            toast.show();
+        }
+
         function copyUrl() {
             navigator.clipboard.writeText(document.getElementById('shareUrl').textContent);
-            alert('链接已复制');
+            showToast('链接已复制');
         }
 
         function copyCode(elementId) {
             const code = document.getElementById(elementId).textContent;
             navigator.clipboard.writeText(code);
-            alert('代码已复制');
+            showToast('代码已复制');
         }
 
         // 文件树点击高亮

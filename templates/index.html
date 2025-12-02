@@ -218,8 +218,29 @@
         </div>
     </div>
 
+    <!-- Toast 提示 -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div id="toast" class="toast align-items-center border-0" role="alert">
+            <div class="d-flex">
+                <div class="toast-body d-flex align-items-center gap-2">
+                    <i class="bi bi-check-circle-fill text-success" id="toastIcon"></i>
+                    <span id="toastMsg"></span>
+                </div>
+                <button type="button" class="btn-close btn-close-dark me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    </div>
+
     <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
     <script>
+        function showToast(msg, success = true) {
+            document.getElementById('toastMsg').textContent = msg;
+            const icon = document.getElementById('toastIcon');
+            icon.className = success ? 'bi bi-check-circle-fill text-success' : 'bi bi-x-circle-fill text-danger';
+            const toast = new bootstrap.Toast(document.getElementById('toast'), { delay: 2000 });
+            toast.show();
+        }
+
         let fileCount = 0;
 
         function addFile() {
@@ -276,14 +297,14 @@
                     new bootstrap.Modal(document.getElementById('successModal')).show();
                 }
             })
-            .catch(err => alert('创建失败: ' + err));
+            .catch(err => showToast('创建失败: ' + err, false));
         }
 
         function copyUrl() {
             const url = document.getElementById('shareUrl');
             url.select();
             document.execCommand('copy');
-            alert('链接已复制');
+            showToast('链接已复制');
         }
 
         // 初始添加一个文件
