@@ -157,12 +157,19 @@
                         {% endif %}
                     </p>
                 </div>
-                <div class="share-box">
-                    <div class="d-flex gap-2 align-items-center">
-                        <span class="share-url" id="shareUrl">{{ share_url }}</span>
-                        <button class="btn btn-primary" onclick="copyUrl()">
-                            <i class="bi bi-clipboard"></i>
-                        </button>
+                <div class="d-flex gap-2 align-items-center flex-wrap">
+                    {% if paste.is_directory %}
+                    <a href="{{ url_for('download_zip', paste_id=paste.id) }}" class="btn btn-success">
+                        <i class="bi bi-download"></i> 下载ZIP
+                    </a>
+                    {% endif %}
+                    <div class="share-box">
+                        <div class="d-flex gap-2 align-items-center">
+                            <span class="share-url" id="shareUrl">{{ share_url }}</span>
+                            <button class="btn btn-primary" onclick="copyUrl()">
+                                <i class="bi bi-clipboard"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>

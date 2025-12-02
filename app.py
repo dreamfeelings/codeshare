@@ -1,7 +1,9 @@
-from flask import Flask, render_template, request, redirect, url_for, jsonify, abort
+from flask import Flask, render_template, request, redirect, url_for, jsonify, abort, send_file
 import sqlite3
 import uuid
 import os
+import io
+import zipfile
 from datetime import datetime, timedelta
 import threading
 import time
@@ -10,7 +12,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key-change-in-production'
 
 # 网站域名配置，部署时修改为你的域名
-SITE_URL = 'https://code.mqmx.cn'
+SITE_URL = 'https://code.mqmrx.cn'
 
 DATABASE = 'pastes.db'
 
@@ -148,6 +150,33 @@ def raw_file(paste_id, file_id):
         if not file:
             abort(404)
     return file['content'], 200, {'Content-Type': 'text/plain; charset=utf-8'}
+
+@app.route('/p/<paste_id>/download')
+def download_zip(paste_id):
+    """下载目录为ZIP文件"""
+    with get_db() as conn:
+        paste = conn.execute('SELECT * FROM pastes WHERE id = ?', (paste_id,)).fetchone()
+        if not paste or not paste['is_directory']:
+            abort(404)
+        
+        files = conn.execute(
+            'SELECT filename, content FROM directory_files WHERE paste_id = ?',
+            (paste_id,)
+        ).fetchall()
+    
+    # 创建ZIP文件
+    memory_file = io.BytesIO()
+    with zipfile.ZipFile(memory_file, 'w', zipfile.ZIP_DEFLATED) as zf:
+        for f in files:
+            zf.writestr(f['filename'], f['content'].encode('utf-8'))
+    
+    memory_file.seek(0)
+    return send_file(
+        memory_file,
+        mimetype='application/zip',
+        as_attachment=True,
+        download_name=f"{paste['title']}.zip"
+    )
 
 @app.route('/api/recent')
 def recent_pastes():
