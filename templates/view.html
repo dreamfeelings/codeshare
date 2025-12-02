@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ paste.title }} - CodeShare</title>
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap-icons.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/atom-one-light.min.css') }}">
+    <style>
+        :root {
+            --bg-light: #fef9f3;
+            --bg-card: #ffffff;
+            --accent: #f0e6d8;
+            --primary: #e07a5f;
+            --primary-hover: #c9694f;
+            --text: #3d405b;
+            --text-light: #6c6f85;
+        }
+        body {
+            background: var(--bg-light);
+            color: var(--text);
+            min-height: 100vh;
+        }
+        .navbar {
+            background: var(--bg-card) !important;
+            border-bottom: 1px solid var(--accent);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--accent);
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        }
+        .btn-primary {
+            background: var(--primary);
+            border: none;
+        }
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+        .btn-outline-primary {
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+        .btn-outline-primary:hover {
+            background: var(--primary);
+            color: white;
+        }
+        .logo {
+            font-weight: bold;
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+        pre {
+            margin: 0;
+            border-radius: 8px;
+            background: #fafafa !important;
+            border: 1px solid var(--accent);
+        }
+        pre code {
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 14px;
+        }
+        .code-header {
+            background: #f5ebe0;
+            color: var(--text);
+            padding: 10px 15px;
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .code-block {
+            margin-bottom: 20px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .code-block pre {
+            border-radius: 0 0 8px 8px;
+            border-top: none;
+        }
+        .file-tree {
+            background: var(--bg-card);
+            border: 1px solid var(--accent);
+            border-radius: 12px;
+            padding: 15px;
+            position: sticky;
+            top: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .file-tree-item {
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text);
+            text-decoration: none;
+        }
+        .file-tree-item:hover, .file-tree-item.active {
+            background: #faf7f2;
+            color: var(--primary);
+        }
+        .meta-info {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+        .share-box {
+            background: #faf7f2;
+            border: 1px solid var(--accent);
+            border-radius: 12px;
+            padding: 15px;
+        }
+        .share-url {
+            background: #fff;
+            border: 1px solid var(--accent);
+            color: var(--text);
+            padding: 10px;
+            border-radius: 6px;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-light mb-4">
+        <div class="container">
+            <a class="navbar-brand logo" href="/">
+                <i class="bi bi-code-slash"></i> CodeShare
+            </a>
+            <a href="/" class="btn btn-outline-primary">
+                <i class="bi bi-plus-lg"></i> 新建
+            </a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- 分享信息 -->
+        <div class="card p-4 mb-4">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+                <div>
+                    <h3 class="mb-2">
+                        {% if paste.is_directory %}
+                        <i class="bi bi-folder text-warning"></i>
+                        {% else %}
+                        <i class="bi bi-file-code text-info"></i>
+                        {% endif %}
+                        {{ paste.title }}
+                    </h3>
+                    <p class="meta-info mb-0">
+                        <i class="bi bi-clock"></i> {{ paste.created_at }}
+                        {% if paste.is_directory %}
+                        &nbsp;&bull;&nbsp; <i class="bi bi-files"></i> {{ files|length }} 个文件
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="share-box">
+                    <div class="d-flex gap-2 align-items-center">
+                        <span class="share-url" id="shareUrl">{{ request.url }}</span>
+                        <button class="btn btn-primary" onclick="copyUrl()">
+                            <i class="bi bi-clipboard"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if paste.is_directory %}
+        <!-- 多文件目录视图 -->
+        <div class="row">
+            <div class="col-md-3 mb-4">
+                <div class="file-tree">
+                    <h6 class="mb-3"><i class="bi bi-folder2-open"></i> 文件列表</h6>
+                    {% for file in files %}
+                    <a href="#file-{{ file.id }}" class="file-tree-item">
+                        <i class="bi bi-file-earmark-code"></i>
+                        {{ file.filename }}
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-md-9">
+                {% for file in files %}
+                <div class="code-block" id="file-{{ file.id }}">
+                    <div class="code-header">
+                        <span>
+                            <i class="bi bi-file-earmark-code"></i>
+                            {{ file.filename }}
+                        </span>
+                        <div>
+                            <button class="btn btn-sm btn-outline-secondary" onclick="copyCode('code-{{ file.id }}')">
+                                <i class="bi bi-clipboard"></i> 复制
+                            </button>
+                            <a href="{{ url_for('raw_file', paste_id=paste.id, file_id=file.id) }}" 
+                               class="btn btn-sm btn-outline-secondary" target="_blank">
+                                <i class="bi bi-file-text"></i> Raw
+                            </a>
+                        </div>
+                    </div>
+                    <pre><code id="code-{{ file.id }}" class="language-{{ file.language }}">{{ file.content }}</code></pre>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% else %}
+        <!-- 单文件视图 -->
+        <div class="code-block">
+            <div class="code-header">
+                <span>
+                    <i class="bi bi-file-earmark-code"></i>
+                    {{ paste.language }}
+                </span>
+                <div>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="copyCode('code-main')">
+                        <i class="bi bi-clipboard"></i> 复制代码
+                    </button>
+                    <a href="{{ url_for('raw_paste', paste_id=paste.id) }}" 
+                       class="btn btn-sm btn-outline-secondary" target="_blank">
+                        <i class="bi bi-file-text"></i> Raw
+                    </a>
+                </div>
+            </div>
+            <pre><code id="code-main" class="language-{{ paste.language }}">{{ paste.content }}</code></pre>
+        </div>
+        {% endif %}
+    </div>
+
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/highlight.min.js') }}"></script>
+    <script>
+        // 代码高亮
+        hljs.highlightAll();
+
+        function copyUrl() {
+            navigator.clipboard.writeText(document.getElementById('shareUrl').textContent);
+            alert('链接已复制');
+        }
+
+        function copyCode(elementId) {
+            const code = document.getElementById(elementId).textContent;
+            navigator.clipboard.writeText(code);
+            alert('代码已复制');
+        }
+
+        // 文件树点击高亮
+        document.querySelectorAll('.file-tree-item').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('.file-tree-item').forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+    </script>
+
+    <footer class="text-center py-4 mt-5" style="color: var(--text-light); font-size: 0.9rem;">
+        <p class="mb-0">Made with <span style="color: var(--primary);">♥</span> by 阿尼亚与她</p>
+    </footer>
+</body>
+</html>

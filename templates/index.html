@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeShare - 代码分享</title>
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap-icons.css') }}">
+    <style>
+        :root {
+            --bg-light: #fef9f3;
+            --bg-card: #ffffff;
+            --accent: #f0e6d8;
+            --primary: #e07a5f;
+            --primary-hover: #c9694f;
+            --text: #3d405b;
+            --text-light: #6c6f85;
+        }
+        body {
+            background: var(--bg-light);
+            color: var(--text);
+            min-height: 100vh;
+        }
+        .navbar {
+            background: var(--bg-card) !important;
+            border-bottom: 1px solid var(--accent);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--accent);
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        }
+        .form-control, .form-select {
+            background: #faf7f2;
+            border: 1px solid var(--accent);
+            color: var(--text);
+        }
+        .form-control::placeholder {
+            color: var(--text-light);
+        }
+        .form-control:focus, .form-select:focus {
+            background: #fff;
+            border-color: var(--primary);
+            color: var(--text);
+            box-shadow: 0 0 0 0.2rem rgba(224, 122, 95, 0.2);
+        }
+        .btn-primary {
+            background: var(--primary);
+            border: none;
+        }
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+        .btn-outline-primary {
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+        .btn-outline-primary:hover {
+            background: var(--primary);
+            color: white;
+        }
+        .nav-tabs .nav-link {
+            color: var(--text-light);
+            border: none;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-tabs .nav-link.active {
+            background: transparent;
+            color: var(--primary);
+            border-bottom: 2px solid var(--primary);
+        }
+        .nav-tabs {
+            border-bottom: 1px solid var(--accent);
+        }
+        textarea {
+            font-family: 'Fira Code', 'Consolas', monospace;
+            resize: vertical;
+        }
+        .file-item {
+            background: #faf7f2;
+            border: 1px solid var(--accent);
+            border-radius: 12px;
+            margin-bottom: 12px;
+            padding: 15px;
+        }
+        .file-item .file-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .file-list {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        .logo {
+            font-weight: bold;
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-light mb-4">
+        <div class="container">
+            <a class="navbar-brand logo" href="/">
+                <i class="bi bi-code-slash"></i> CodeShare
+            </a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="card p-4">
+                    <ul class="nav nav-tabs mb-4" role="tablist">
+                        <li class="nav-item">
+                            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#single">
+                                <i class="bi bi-file-code"></i> 单文件
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#directory">
+                                <i class="bi bi-folder"></i> 多文件目录
+                            </button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content">
+                        <!-- 单文件模式 -->
+                        <div class="tab-pane fade show active" id="single">
+                            <form action="/paste" method="POST">
+                                <div class="row mb-3">
+                                    <div class="col-md-8">
+                                        <input type="text" class="form-control" name="title" placeholder="标题（可选）">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <select class="form-select" name="language">
+                                            <option value="plaintext">纯文本</option>
+                                            <option value="python">Python</option>
+                                            <option value="javascript">JavaScript</option>
+                                            <option value="typescript">TypeScript</option>
+                                            <option value="java">Java</option>
+                                            <option value="cpp">C++</option>
+                                            <option value="c">C</option>
+                                            <option value="go">Go</option>
+                                            <option value="rust">Rust</option>
+                                            <option value="html">HTML</option>
+                                            <option value="css">CSS</option>
+                                            <option value="sql">SQL</option>
+                                            <option value="json">JSON</option>
+                                            <option value="yaml">YAML</option>
+                                            <option value="bash">Bash</option>
+                                            <option value="markdown">Markdown</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <textarea class="form-control" name="content" rows="15" 
+                                        placeholder="在这里粘贴你的代码..." required></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="bi bi-share"></i> 生成分享链接
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- 多文件目录模式 -->
+                        <div class="tab-pane fade" id="directory">
+                            <div class="mb-3">
+                                <input type="text" class="form-control" id="projectTitle" placeholder="项目名称">
+                            </div>
+                            
+                            <div class="file-list" id="fileList">
+                                <!-- 文件项会动态添加 -->
+                            </div>
+
+                            <div class="d-flex gap-2 mb-3">
+                                <button class="btn btn-outline-primary" onclick="addFile()">
+                                    <i class="bi bi-plus-lg"></i> 添加文件
+                                </button>
+                            </div>
+
+                            <button class="btn btn-primary btn-lg" onclick="submitDirectory()">
+                                <i class="bi bi-share"></i> 生成分享链接
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 成功弹窗 -->
+    <div class="modal fade" id="successModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="background: var(--bg-card); border: 1px solid var(--accent); border-radius: 16px;">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title"><i class="bi bi-check-circle text-success"></i> 创建成功</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="shareUrl" readonly>
+                        <button class="btn btn-primary" onclick="copyUrl()">
+                            <i class="bi bi-clipboard"></i> 复制
+                        </button>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <a href="#" id="viewLink" class="btn btn-outline-primary">
+                        <i class="bi bi-eye"></i> 查看
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+    <script>
+        let fileCount = 0;
+
+        function addFile() {
+            fileCount++;
+            const html = `
+                <div class="file-item" id="file-${fileCount}">
+                    <div class="file-header">
+                        <input type="text" class="form-control" style="max-width: 300px;" 
+                            placeholder="文件名 (如: main.py)" id="filename-${fileCount}">
+                        <button class="btn btn-sm btn-outline-danger" onclick="removeFile(${fileCount})">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                    <textarea class="form-control" rows="8" placeholder="文件内容..." id="content-${fileCount}"></textarea>
+                </div>
+            `;
+            document.getElementById('fileList').insertAdjacentHTML('beforeend', html);
+        }
+
+        function removeFile(id) {
+            document.getElementById(`file-${id}`).remove();
+        }
+
+        function submitDirectory() {
+            const title = document.getElementById('projectTitle').value || '未命名项目';
+            const fileItems = document.querySelectorAll('.file-item');
+            const files = [];
+
+            fileItems.forEach(item => {
+                const id = item.id.split('-')[1];
+                const filename = document.getElementById(`filename-${id}`).value;
+                const content = document.getElementById(`content-${id}`).value;
+                if (filename && content) {
+                    files.push({ filename, content });
+                }
+            });
+
+            if (files.length === 0) {
+                alert('请至少添加一个有效文件');
+                return;
+            }
+
+            fetch('/directory', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title, files })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.url) {
+                    const fullUrl = window.location.origin + data.url;
+                    document.getElementById('shareUrl').value = fullUrl;
+                    document.getElementById('viewLink').href = data.url;
+                    new bootstrap.Modal(document.getElementById('successModal')).show();
+                }
+            })
+            .catch(err => alert('创建失败: ' + err));
+        }
+
+        function copyUrl() {
+            const url = document.getElementById('shareUrl');
+            url.select();
+            document.execCommand('copy');
+            alert('链接已复制');
+        }
+
+        // 初始添加一个文件
+        addFile();
+    </script>
+
+    <footer class="text-center py-4 mt-5" style="color: var(--text-light); font-size: 0.9rem;">
+        <p class="mb-0">Made with <span style="color: var(--primary);">♥</span> by 阿尼亚与她</p>
+    </footer>
+</body>
+</html>
